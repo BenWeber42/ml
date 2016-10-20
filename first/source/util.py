@@ -6,6 +6,7 @@ from nibabel.nifti1 import (
     Nifti1Image
 )
 from os.path import dirname, abspath
+import csv
 
 
 DATA_PATH = dirname(abspath(__file__)) + '/../data'
@@ -13,6 +14,7 @@ PLOTS_PATH = dirname(abspath(__file__)) + '/../plots'
 
 DIMS = X_DIM, Y_DIM, Z_DIM = 176, 208, 176
 TRAIN_COUNT = 278
+TEST_COUNT = 138
 
 FEATURE_SPACE = X_DIM * Y_DIM * Z_DIM
 Z_PLANE_FEATURE_SPACE = X_DIM * Y_DIM
@@ -29,12 +31,14 @@ def load_nifti1(path):
 def load_train(i):
     return load_nifti1('%s/set_train/train_%d.nii' % (DATA_PATH, i + 1))
 
+def load_test(i):
+    return load_nifti1('%s/set_test/test_%d.nii' % (DATA_PATH, i + 1))
 
 def save(data, filename):
     _save_nifti1(Nifti1Image(data, None), filename)
 
 
-def load_train_dataset(dims, load, observations_axis=1, dtype=np.float64):
+def load_dataset(dims, load, observations_axis=1, dtype=np.float64):
     x_dim, y_dim = dims
 
     if observations_axis == 1:
@@ -42,7 +46,7 @@ def load_train_dataset(dims, load, observations_axis=1, dtype=np.float64):
     else:
         data = np.empty([y_dim, x_dim], dtype=dtype)
 
-    for num in range(TRAIN_COUNT):
+    for num in range(y_dim):
         if observations_axis == 1:
             data[:, num] = load(num).reshape(x_dim)
         else:
@@ -50,32 +54,45 @@ def load_train_dataset(dims, load, observations_axis=1, dtype=np.float64):
 
     return data
 
-
 def load_all_train(observations_axis=1, dtype=np.float64):
-    return load_train_dataset(
+    return load_dataset(
             (FEATURE_SPACE, TRAIN_COUNT), load_train,
             observations_axis=observations_axis, dtype=dtype
         )
 
+def load_all_test(observations_axis=1, dtype=np.float64):
+    return load_dataset(
+            (FEATURE_SPACE, TEST_COUNT), load_test,
+            observations_axis=observations_axis, dtype=dtype
+        )
 
-def load_z_plane(i, z=int(Z_DIM/2)):
-    return load_train(i)[:, :, z]
+def load_z_plane(i, z=int(Z_DIM/2), train_data=True):
+    if train_data == True:
+        return load_train(i)[:, :, z]
+    else:
+        return load_test(i)[:, :, z]
 
 
 def load_all_z_planes(
     z=int(Z_DIM/2),
+    train_data=True,
     observations_axis=1,
     dtype=np.float64
 ):
 
     def _load_z_plane(i):
-        return load_z_plane(i, z)
+        return load_z_plane(i, z, train_data)
 
-    return load_train_dataset(
-            (Z_PLANE_FEATURE_SPACE, TRAIN_COUNT), _load_z_plane,
-            observations_axis=observations_axis, dtype=dtype
-        )
-
+    if train_data == True:
+        return load_dataset(
+                (Z_PLANE_FEATURE_SPACE, TRAIN_COUNT), _load_z_plane,
+                observations_axis=observations_axis, dtype=dtype
+            )
+    else:
+        return load_dataset(
+                (Z_PLANE_FEATURE_SPACE, TEST_COUNT), _load_z_plane,
+                observations_axis=observations_axis, dtype=dtype
+            )
 
 def nonzero_rv(data, observations_axis=1):
     nnz = np.nonzero(np.sum(data, axis=observations_axis))[0]
@@ -124,3 +141,11 @@ def pca_plots(data, plots_dir, components_correlation=10):
                  data_reduced[component], predictions, '--k')
         plt.savefig('%s/component%d_correlation' % (plots_dir, component))
         plt.close()
+
+def create_submission_file(labels, output_file='submission.csv'):
+    with open('%s/%s' % (DATA_PATH, output_file), 'w') as outcsv:
+        writer = csv.writer(outcsv)
+        writer.writerow(["ID", "Prediction"])
+
+        for row_data in zip(range(1, TEST_COUNT+1), labels):
+            writer.writerow(list(row_data))

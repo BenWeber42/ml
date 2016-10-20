@@ -1,0 +1,7 @@
+first/data/data.tar.gz
+first/data/targets.csv
+first/data/set_test/
+first/data/set_train/
+first/plots/10_planes/
+first/plots/mid_cuts/
+first/source/__pycache__/
