@@ -149,3 +149,10 @@ def create_submission_file(labels, output_file='submission.csv'):
 
         for row_data in zip(range(1, TEST_COUNT+1), labels):
             writer.writerow(list(row_data))
+            
+def load_preprocessed_data(data_files):
+	# data_files is a tuple of training and test files which are
+	# preprocessed and saved in .npy format.
+	train_data = np.load('%s/%s' % (DATA_PATH, data_files[0]))
+	test_data = np.load('%s/%s' % (DATA_PATH, data_files[1]))
+	return (train_data, test_data)

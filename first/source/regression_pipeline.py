@@ -1,22 +1,40 @@
 #!/usr/bin/env python
+#!/usr/bin/env python -W ignore::DeprecationWarning
 import numpy as np
 import util
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from sklearn.model_selection import GridSearchCV, cross_val_score
 
+# A one-word-descriptor for the experiment 
+SUBMISSION_FILE_SUFFIX = 'pp_data'
+
 # Data hyper-parameters
 TRAIN_COUNT = 278
 TEST_COUNT = 138
-PLANES_Z = [20, 35, 56, 70, 87, 97, 107, 117, 127, 137]
+
+# Alredy preprocessed data. Data files must reside under DATA_PATH (see util.py)
+# If it is False, the raw data is loaded and preprocessed from scratch.
+USE_PREPROCESSED_DATA = ('train_reduced.npy', 'test_reduced.npy')
+
+# If USE_PREPROCESSED_DATA = False, then raw data of the provided z-planes 
+# will be loaded and preprocessed.
+#PLANES_Z = [20, 35, 56, 70, 87, 97, 107, 117, 127, 137]
+PLANES_Z = list(range(20,170)) # Load all planes.
+
 # Regression hyper-parameters
-REDUCED_DIM = 10
-MIX_TRAIN_TEST_FOR_REDUCTION = False
-ESTIMATORS = {
-    'svm_rbf': False,
+REDUCED_DIM = 50
+MIX_TRAIN_TEST_FOR_REDUCTION = True
+ESTIMATOR_POOL = {
+    'svm_rbf': True,
     'huber': True,
-    'lasso': False,
+    'lasso': True,
+    'decision_tree': True,
+    'random_forest': True,
+    'adaboost': True
 }
+PRINT_ESTIMATOR_RESULTS = False # If True, prints results for all possible configurations.
+N_JOBS = 6 # Num of CPU cores for parallel processing.
 
 def load_10_planes():
     train_planes = []
@@ -37,63 +55,152 @@ def main():
     #########
     # Prepare feature matrices.
     #########
-    # Load train & test data.
-    train_planes, test_planes = load_10_planes()
     normalizer = preprocessing.StandardScaler()
-    training_targets = util.load_refs()
-    if MIX_TRAIN_TEST_FOR_REDUCTION == True:
-        print('Using both training and test data for reduction.')
-        # Apply data reduction on both train and test data.
-        # Note that this is not the best practice.
-        planes = np.hstack((train_planes, test_planes))
-        pc, _ = util.dense_pca(planes)
-        reduced_planes = np.dot(planes.T, pc[:, :REDUCED_DIM])
-        # Normalize data.
-        reduced_planes = normalizer.fit_transform(reduced_planes)
-        # Set training and test feature matrices which will be used
-        # by the estimators.
-        training_feature_matrix = reduced_planes[:TRAIN_COUNT,:]
-        test_feature_matrix = reduced_planes[TRAIN_COUNT:,:]
+    training_targets = util.load_refs() # Load targets (i.e. ages)
+    # Load train & test data.
+    if not USE_PREPROCESSED_DATA:
+        print('Loading and preprocessing raw data.')
+        train_planes, test_planes = load_10_planes()    
+        if MIX_TRAIN_TEST_FOR_REDUCTION == True:
+            print('Using both training and test data for reduction.')
+            # Apply data reduction on both train and test data.
+            # Note that this is not the best practice.
+            planes = np.hstack((train_planes, test_planes))
+            pc, _ = util.dense_pca(planes)
+            reduced_planes = np.dot(planes.T, pc[:, :REDUCED_DIM])
+            # Normalize data.
+            reduced_planes = normalizer.fit_transform(reduced_planes)
+            # Set training and test feature matrices which will be used
+            # by the estimators.
+            training_feature_matrix = reduced_planes[:TRAIN_COUNT,:]
+            test_feature_matrix = reduced_planes[TRAIN_COUNT:,:]
+        else:
+            print('Using only training data for reduction.')
+            pc, _ = util.dense_pca(train_planes)
+            reduced_train_planes = np.dot(train_planes.T, pc[:, :REDUCED_DIM])
+            reduced_test_planes = np.dot(test_planes.T, pc[:, :REDUCED_DIM])
+            # Normalize data.
+            training_feature_matrix = normalizer.fit_transform(reduced_train_planes)
+            test_feature_matrix = normalizer.transform(reduced_test_planes)
     else:
-        print('Using only training data for reduction.')
-        pc, _ = util.dense_pca(train_planes)
-        reduced_train_planes = np.dot(train_planes.T, pc[:, :REDUCED_DIM])
-        reduced_test_planes = np.dot(test_planes.T, pc[:, :REDUCED_DIM])
+        print('Using preprocessed-data.')
+        train_planes, test_planes = util.load_preprocessed_data(USE_PREPROCESSED_DATA)
         # Normalize data.
-        training_feature_matrix = normalizer.fit_transform(reduced_train_planes)
-        test_feature_matrix = normalizer.transform(reduced_test_planes)
+        training_feature_matrix = normalizer.fit_transform(train_planes.T)
+        test_feature_matrix = normalizer.transform(test_planes.T)
     #########
     # Grid Search and Regression
     #########
     # SVM (RBF Kernel)
-    if ESTIMATORS['svm_rbf'] == True:
+    if ESTIMATOR_POOL['svm_rbf'] == True:
         print('Doing SVM (RBF) Regression...')
         from sklearn.svm import SVR
         # Parameter grid
         Cs = np.logspace(-4, 6, 15)
         gammas = np.logspace(-8, 1, 15)
         svr_rbf = SVR(kernel='rbf')
-        clf = GridSearchCV(estimator=svr_rbf, param_grid=dict(C=Cs, gamma=gammas), n_jobs=-1, cv=5, scoring='neg_mean_squared_error')
+        clf = GridSearchCV(estimator=svr_rbf, param_grid=dict(C=Cs, gamma=gammas), n_jobs=N_JOBS, cv=10, scoring='neg_mean_squared_error')
         clf.fit(training_feature_matrix, training_targets)
-        for params, mean_score, scores in clf.grid_scores_:
-            print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
-        print("SVM(RBF) - The best parameters are %s with a score of %0.2f" % (clf.best_params_, clf.best_score_))
+        if PRINT_ESTIMATOR_RESULTS == True:
+            for params, mean_score, scores in clf.grid_scores_:
+                print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
+        print("SVM(RBF) [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
         predicted_labels = clf.predict(test_feature_matrix)
-        util.create_submission_file(predicted_labels, 'submission_rbf_svm.csv')
+        util.create_submission_file(predicted_labels, 'submission_rbf_svm_%s.csv' % (SUBMISSION_FILE_SUFFIX))
     # Huber Regression
-    if ESTIMATORS['huber'] == True:
+    if ESTIMATOR_POOL['huber'] == True:
         print('Doing Huber Regression...')
         from sklearn.linear_model import HuberRegressor
         alphas = np.linspace(0.1, 5, 10)
         epsilons = np.linspace(1, 10, 10)
         huber = HuberRegressor(fit_intercept=True, max_iter=500)
-        clf = GridSearchCV(estimator=huber, param_grid=dict(alpha=alphas, epsilon=epsilons), n_jobs=-1, cv=5, scoring='neg_mean_squared_error')
+        clf = GridSearchCV(estimator=huber, param_grid=dict(alpha=alphas, epsilon=epsilons), n_jobs=N_JOBS, cv=10, scoring='neg_mean_squared_error')
         clf.fit(training_feature_matrix, training_targets)
-        for params, mean_score, scores in clf.grid_scores_:
-            print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
-        print("Huber Regression - The best parameters are %s with a score of %0.2f" % (clf.best_params_, clf.best_score_))
+        if PRINT_ESTIMATOR_RESULTS == True:
+            for params, mean_score, scores in clf.grid_scores_:
+                print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
+        print("Huber Regression [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
         predicted_labels = clf.predict(test_feature_matrix)
-        util.create_submission_file(predicted_labels, 'submission_huber.csv')
+        util.create_submission_file(predicted_labels, 'submission_huber_%s.csv' % (SUBMISSION_FILE_SUFFIX))
+    # LASSO
+    if ESTIMATOR_POOL['lasso'] == True:
+        print('Doing LASSO Regression...')
+        from sklearn.linear_model import Lasso
+        alphas = np.linspace(0.1, 6, 20)
+        lasso = Lasso(alpha=0.1, copy_X=True, fit_intercept=False, max_iter=1000)
+        clf = GridSearchCV(estimator=lasso, param_grid=dict(alpha=alphas), n_jobs=N_JOBS, cv=10, scoring='neg_mean_squared_error')
+        clf.fit(training_feature_matrix, training_targets)
+        if PRINT_ESTIMATOR_RESULTS == True:
+            for params, mean_score, scores in clf.grid_scores_:
+                print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
+        print("LASSO Regression [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+        predicted_labels = clf.predict(test_feature_matrix)
+        util.create_submission_file(predicted_labels, 'submission_lasso_%s.csv' % (SUBMISSION_FILE_SUFFIX))
+    # Decision Tree
+    if ESTIMATOR_POOL['decision_tree'] == True:
+        print('Doing Decision Tree Regression...')
+        # Use random search instead of grid search.
+        from scipy.stats import randint as sp_randint
+        from sklearn.tree import DecisionTreeRegressor
+        from sklearn.grid_search import RandomizedSearchCV
+        decision_tree = DecisionTreeRegressor(random_state=0)
+        param_dist = {"max_depth": [3, 5, None],
+              "max_features": sp_randint(1, 20),
+              "min_samples_split": sp_randint(1, 20),
+              "min_samples_leaf": sp_randint(1, 20)
+              }
+        n_iter_search = 500
+        clf = RandomizedSearchCV(decision_tree, param_distributions=param_dist, n_iter=n_iter_search, n_jobs=N_JOBS, cv=10, scoring='neg_mean_squared_error')
+        #clf = GridSearchCV(estimator=decision_tree, param_grid=dict(), n_jobs=-1, cv=5, scoring='neg_mean_squared_error')
+        clf.fit(training_feature_matrix, training_targets)
+        if PRINT_ESTIMATOR_RESULTS == True:
+            for params, mean_score, scores in clf.grid_scores_:
+                print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
+        print("Decision Tree Regression [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+        predicted_labels = clf.predict(test_feature_matrix)
+        util.create_submission_file(predicted_labels, 'submission_decision_tree_%s.csv' % (SUBMISSION_FILE_SUFFIX))
+    # Random Forest
+    if ESTIMATOR_POOL['random_forest'] == True:
+        print('Doing Random Forest Regression...')
+        # Use random search instead of grid search.
+        from scipy.stats import randint as sp_randint
+        from sklearn.ensemble import RandomForestRegressor
+        from sklearn.grid_search import RandomizedSearchCV
+        forest = RandomForestRegressor(random_state=0)
+        param_dist = {"max_depth": [3, 5, None],
+              "max_features": sp_randint(1, 20),
+              "min_samples_split": sp_randint(1, 20),
+              "min_samples_leaf": sp_randint(1, 20),
+              'n_estimators': [10, 25, 50, 100],
+              'bootstrap': [True, False],
+              }
+        n_iter_search = 200
+        clf = RandomizedSearchCV(forest, param_distributions=param_dist, n_iter=n_iter_search, n_jobs=N_JOBS, cv=10, scoring='neg_mean_squared_error')
+        #clf = GridSearchCV(estimator=decision_tree, param_grid=dict(), n_jobs=-1, cv=5, scoring='neg_mean_squared_error')
+        clf.fit(training_feature_matrix, training_targets)
+        if PRINT_ESTIMATOR_RESULTS == True:
+            for params, mean_score, scores in clf.grid_scores_:
+                print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
+        print("Random Forest Regression [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+        predicted_labels = clf.predict(test_feature_matrix)
+        util.create_submission_file(predicted_labels, 'submission_random_forest_%s.csv' % (SUBMISSION_FILE_SUFFIX))
+    # AdaBoost
+    if ESTIMATOR_POOL['adaboost'] == True:
+        print('Doing AdaBoost Regression...')
+        from sklearn.ensemble import AdaBoostRegressor
+        adaboost = AdaBoostRegressor(loss='square', random_state=0)
+        param_dist = {
+              "learning_rate": [1e-4, 1e-3, 1e-2, 1e-1, 1, 2],
+              'n_estimators': [10, 25, 50, 100, 200],
+              }
+        clf = GridSearchCV(estimator=adaboost, param_grid=param_dist, n_jobs=N_JOBS, cv=10, scoring='neg_mean_squared_error')
+        clf.fit(training_feature_matrix, training_targets)
+        if PRINT_ESTIMATOR_RESULTS == True:
+            for params, mean_score, scores in clf.grid_scores_:
+                print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
+        print("AdaBoost Regression [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+        predicted_labels = clf.predict(test_feature_matrix)
+        util.create_submission_file(predicted_labels, 'submission_adaboost_%s.csv' % (SUBMISSION_FILE_SUFFIX))
 
 if __name__ == '__main__':
     main()
