@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.decomposition import TruncatedSVD
 import matplotlib.pyplot as plt
 from nibabel.nifti1 import (
     load as _load_nifti1,
@@ -31,8 +32,10 @@ def load_nifti1(path):
 def load_train(i):
     return load_nifti1('%s/set_train/train_%d.nii' % (DATA_PATH, i + 1))
 
+
 def load_test(i):
     return load_nifti1('%s/set_test/test_%d.nii' % (DATA_PATH, i + 1))
+
 
 def save(data, filename):
     _save_nifti1(Nifti1Image(data, None), filename)
@@ -54,17 +57,34 @@ def load_dataset(dims, load, observations_axis=1, dtype=np.float64):
 
     return data
 
+
 def load_all_train(observations_axis=1, dtype=np.float64):
     return load_dataset(
             (FEATURE_SPACE, TRAIN_COUNT), load_train,
             observations_axis=observations_axis, dtype=dtype
         )
 
+
 def load_all_test(observations_axis=1, dtype=np.float64):
     return load_dataset(
             (FEATURE_SPACE, TEST_COUNT), load_test,
             observations_axis=observations_axis, dtype=dtype
         )
+
+
+def load_full_dataset(observation_axis=1, dtype=np.float64):
+
+    def load(i):
+        if i < TRAIN_COUNT:
+            return load_train(i)
+        else:
+            return load_test(i - TRAIN_COUNT)
+
+    return load_dataset(
+            (FEATURE_SPACE, TRAIN_COUN + TEST_COUNT), load,
+            observation_axis=observation_axis, dtype=dtype
+        )
+
 
 def load_z_plane(i, z=int(Z_DIM/2), train_data=True):
     if train_data == True:
@@ -115,6 +135,27 @@ def dense_pca(X, full_matrices=False, observations_axis=1):
     return u, d**2
 
 
+def truncated_pca(X, observation_axis=1, n_components=1000):
+    tsvd = TruncatedSVD(n_components=n_components)
+
+    if observation_axis == 0:
+        X = X.T
+
+    X -= np.mean(X, axis=1, keepdims=True)
+
+    print('Doing truncated SVD on %d, %d matrix computing %d components' %
+          (X.shape[0], X.shape[1], n_components))
+    tsvd.fit(X.T)
+
+
+    if observation_axis == 0:
+        components = tsvd.components_
+    else:
+        components = tsvd.components_.T
+
+    return components, tsvd.explained_variance_, tsvd.explained_variance_ratio_
+
+
 def pca_plots(data, plots_dir, components_correlation=10):
     pc, pv = dense_pca(data)
 
@@ -141,6 +182,7 @@ def pca_plots(data, plots_dir, components_correlation=10):
                  data_reduced[component], predictions, '--k')
         plt.savefig('%s/component%d_correlation' % (plots_dir, component))
         plt.close()
+
 
 def create_submission_file(labels, output_file='submission.csv'):
     with open('%s/%s' % (DATA_PATH, output_file), 'w') as outcsv:
