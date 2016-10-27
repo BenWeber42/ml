@@ -72,7 +72,7 @@ def load_all_test(observations_axis=1, dtype=np.float64):
         )
 
 
-def load_full_dataset(observation_axis=1, dtype=np.float64):
+def load_full_dataset(observations_axis=1, dtype=np.float64):
 
     def load(i):
         if i < TRAIN_COUNT:
@@ -81,8 +81,8 @@ def load_full_dataset(observation_axis=1, dtype=np.float64):
             return load_test(i - TRAIN_COUNT)
 
     return load_dataset(
-            (FEATURE_SPACE, TRAIN_COUN + TEST_COUNT), load,
-            observation_axis=observation_axis, dtype=dtype
+            (FEATURE_SPACE, TRAIN_COUNT + TEST_COUNT), load,
+            observations_axis=observations_axis, dtype=dtype
         )
 
 
@@ -135,10 +135,10 @@ def dense_pca(X, full_matrices=False, observations_axis=1):
     return u, d**2
 
 
-def truncated_pca(X, observation_axis=1, n_components=1000):
+def truncated_pca(X, observations_axis=1, n_components=1000):
     tsvd = TruncatedSVD(n_components=n_components)
 
-    if observation_axis == 0:
+    if observations_axis == 0:
         X = X.T
 
     X -= np.mean(X, axis=1, keepdims=True)
@@ -148,7 +148,7 @@ def truncated_pca(X, observation_axis=1, n_components=1000):
     tsvd.fit(X.T)
 
 
-    if observation_axis == 0:
+    if observations_axis == 0:
         components = tsvd.components_
     else:
         components = tsvd.components_.T
