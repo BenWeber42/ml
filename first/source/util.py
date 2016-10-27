@@ -147,7 +147,6 @@ def truncated_pca(X, observations_axis=1, n_components=1000):
           (X.shape[0], X.shape[1], n_components))
     tsvd.fit(X.T)
 
-
     if observations_axis == 0:
         components = tsvd.components_
     else:
@@ -191,7 +190,8 @@ def create_submission_file(labels, output_file='submission.csv'):
 
         for row_data in zip(range(1, TEST_COUNT+1), labels):
             writer.writerow(list(row_data))
-            
+
+
 def load_preprocessed_data(data_files):
 	# data_files is a tuple of training and test files which are
 	# preprocessed and saved in .npy format.
