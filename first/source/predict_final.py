@@ -1,13 +1,12 @@
 #!/usr/bin/env python -W ignore::DeprecationWarning
 import numpy as np
 import util
-import matplotlib.pyplot as plt
 from sklearn import preprocessing, decomposition, manifold
 from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 # A one-word-descriptor for the experiment 
-SUBMISSION_FILE_SUFFIX = ''
+SUBMISSION_FILE_SUFFIX = 'final'
 
 # Data hyper-parameters
 TRAIN_COUNT = 278
@@ -15,12 +14,12 @@ TEST_COUNT = 138
 
 # Alredy preprocessed data. Data files must reside under DATA_PATH (see util.py)
 # If it is False, the raw data is loaded and preprocessed from scratch.
-USE_PREPROCESSED_DATA = ('train_full_reduced.npy', 'test_full_reduced.npy')
+USE_PREPROCESSED_DATA = False #('train_full_reduced.npy', 'test_full_reduced.npy')
 
 # If USE_PREPROCESSED_DATA = False, then raw data of the provided z-planes 
 # will be loaded and preprocessed.
-PLANES_Z = [20, 35, 56, 70, 87, 97, 107, 117, 127, 137]
-#PLANES_Z = list(range(20,170)) # Load all planes.
+#PLANES_Z = [20, 35, 56, 70, 87, 97, 107, 117, 127, 137]
+PLANES_Z = list(range(15,175)) # Load all planes.
 
 # Regression hyper-parameters
 REDUCED_DIM = 50
@@ -31,20 +30,23 @@ ESTIMATOR_POOL = {
     'lasso': False,
     'decision_tree': False,
     'random_forest': False,
-    'adaboost': True,
-    'gradientBR': True, # GradientBoostingRegressor
+    'adaboost': False,
+    'gradientBR': False, # GradientBoostingRegressor
 }
-USE_FEATURE_POOL = True
-FEATURE_POOL = { # Specifies corresponding dimensionalites. Active if it is larger than 0.
+USE_FEATURE_POOL = False
+# Specifies corresponding dimensionalites. Active if it is larger than 0.
+# Calculates the sample coordinates in the lower-dimensional space for every
+# technique. Simply concatenates them and creates a feature matrix for the classifiers.
+FEATURE_POOL = {
     'tsne': 10,
     'lda': 10,
-    'pca': 30,
+    'pca': 50,
     'mds': 0
 }
-PRINT_ESTIMATOR_RESULTS = False # If True, prints results for all possible configurations.
-N_JOBS = 6 # Num of CPU cores for parallel processing.
+PRINT_ESTIMATOR_RESULTS = False # If True, prints results of all possible configurations.
+N_JOBS = 16 # Num of CPU cores for parallel processing.
 
-def load_10_planes():
+def load_planes():
     training_planes = []
     for i in range(len(PLANES_Z)):
         z = PLANES_Z[i]
@@ -68,17 +70,18 @@ def main():
     # Load train & test data.
     if not USE_PREPROCESSED_DATA:
         print('Loading and preprocessing raw data.')
-        training_planes, test_planes = load_10_planes()
+        training_planes, test_planes = load_planes()
         training_planes = training_planes.T
         test_planes = test_planes.T
         all_planes = np.vstack((training_planes, test_planes))
         if MIX_TRAIN_TEST_FOR_REDUCTION == True:
             print('Using both training and test data for reduction.')
+            # Normalize data.
             all_planes = normalizer.fit_transform(all_planes)
             # Apply data reduction on both train and test data.
             # Note that this is not the best practice.
-            #all_planes = decomposition.PCA(n_components=REDUCED_DIM, whiten=False).fit_transform(all_planes)
-            all_planes = decomposition.KernelPCA(n_components=REDUCED_DIM, kernel='rbf').fit_transform(all_planes)
+            all_planes = decomposition.PCA(n_components=REDUCED_DIM, whiten=False).fit_transform(all_planes)
+            #all_planes = decomposition.KernelPCA(n_components=REDUCED_DIM, kernel='rbf').fit_transform(all_planes)
             training_planes = all_planes[:TRAIN_COUNT,:]
             test_planes = all_planes[TRAIN_COUNT:,:]
         else:
@@ -86,9 +89,9 @@ def main():
             # Normalize data.
             training_planes = normalizer.fit_transform(training_planes)
             test_planes = normalizer.transform(test_planes)
-            svd_decomp = decomposition.PCA(n_components=REDUCED_DIM, whiten=False)
-            training_planes = svd_decomp.fit_transform(training_planes)
-            test_planes = svd_decomp.transform(test_planes)
+            pca_decomp = decomposition.PCA(n_components=REDUCED_DIM, whiten=False)
+            training_planes = pca_decomp.fit_transform(training_planes)
+            test_planes = pca_decomp.transform(test_planes)
             all_planes = np.vstack((training_planes, test_planes))
     else:
         print('Using preprocessed-data.')
@@ -154,7 +157,7 @@ def main():
         Cs = np.logspace(-4, 6, 20)
         gammas = np.logspace(-8, 1, 20)
         svr_rbf = SVR(kernel='rbf')
-        clf = GridSearchCV(estimator=svr_rbf, param_grid=dict(C=Cs, gamma=gammas), n_jobs=N_JOBS, cv=15, scoring='neg_mean_squared_error')
+        clf = GridSearchCV(estimator=svr_rbf, param_grid=dict(C=Cs, gamma=gammas), n_jobs=N_JOBS, cv=10, scoring='neg_mean_squared_error')
         clf.fit(training_feature_matrix, training_targets)
         if PRINT_ESTIMATOR_RESULTS == True:
             for params, mean_score, scores in clf.grid_scores_:

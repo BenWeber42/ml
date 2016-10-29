@@ -1,0 +1,19 @@
+Team: little big data
+- Benjamin Weber <benweber@student.ethz.ch>
+- Emre Aksan <eaksan@inf.ethz.ch>
+- Marco Delai <marco.delai@hest.ethz.ch>
+
+1) Load training & test data and flatten.
+2) Remove zero valued voxels.
+3) Normalize the data (zero mean and unit variance).
+4) In oder to reduce data dimensionality, apply PCA.
+5) Project the data on the first 50 principal dimensions.
+6) Train an SVM (with RBF kernel) classifier by using 
+cross-validation, and optimize C and gamma parameters.
+7) Predict targets for the test data by using the optimized
+classifier.
+
+In addition to PCA and SVM, we tried various classifiers
+and dimensionality reduction techniques which can be found
+in the code. Other configurations can be simply activated
+by changing the corresponding flags.
