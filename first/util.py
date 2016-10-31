@@ -10,8 +10,8 @@ from os.path import dirname, abspath
 import csv
 
 
-DATA_PATH = dirname(abspath(__file__)) + '/../data'
-PLOTS_PATH = dirname(abspath(__file__)) + '/../plots'
+DATA_PATH = dirname(abspath(__file__)) + '/data'
+PLOTS_PATH = dirname(abspath(__file__)) + '/plots'
 
 DIMS = X_DIM, Y_DIM, Z_DIM = 176, 208, 176
 TRAIN_COUNT = 278
@@ -22,7 +22,7 @@ Z_PLANE_FEATURE_SPACE = X_DIM * Y_DIM
 
 
 def load_refs():
-    return np.asarray([int(age) for age in open('../data/targets.csv')])
+    return np.asarray([int(age) for age in open('%s/targets.csv' % DATA_PATH)])
 
 
 def load_nifti1(path):
