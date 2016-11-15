@@ -49,6 +49,16 @@ def get_mask_count(mask):
     return mask[0].shape[0]
 
 
+def recover_from_masked(x, mask=None, dtype=np.float64):
+
+    if mask is None:
+        return x
+
+    mri = np.zeros(DIMS, dtype=dtype)
+    mri[mask] = x;
+    return mri
+
+
 def load_train(i, mask=None):
     return load_nifti1(
         '%s/set_train/train_%d.nii' % (DATA_PATH, i + 1),
@@ -271,8 +281,8 @@ def create_submission_file(labels, output_file='submission.csv'):
 
 
 def load_preprocessed_data(data_files):
-	# data_files is a tuple of training and test files which are
-	# preprocessed and saved in .npy format.
-	train_data = np.load('%s/%s' % (DATA_PATH, data_files[0]))
-	test_data = np.load('%s/%s' % (DATA_PATH, data_files[1]))
-	return (train_data, test_data)
+    # data_files is a tuple of training and test files which are
+    # preprocessed and saved in .npy format.
+    train_data = np.load('%s/%s' % (DATA_PATH, data_files[0]))
+    test_data = np.load('%s/%s' % (DATA_PATH, data_files[1]))
+    return (train_data, test_data)
