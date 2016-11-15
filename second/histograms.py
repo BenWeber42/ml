@@ -31,7 +31,7 @@ class UniformPartitioner(object):
 
 class UniformHistogram(object):
 
-    def __init__(self, interval=(1, 2000), bins=50, partitioner=NoPartitioner):
+    def __init__(self, interval=(1, 2000), bins=50, partitioner=NoPartitioner()):
         self.interval = interval
         self.bins = 50
         self.partitioner = partitioner
