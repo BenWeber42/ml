@@ -24,7 +24,10 @@ __NNZ_MASK_MEMOIZATION = None
 
 
 def load_refs():
-    return np.asarray([int(age) for age in open('%s/targets.csv' % DATA_PATH)])
+    return np.asarray(
+        [int(age) for age in open('%s/targets.csv' % DATA_PATH)],
+        dtype=np.float64
+    )
 
 
 def load_nifti1(path, mask=None):
@@ -117,6 +120,18 @@ def load_all_nnz_train(observations_axis=1, dtype=np.float64):
     )
 
 
+def load_full_pca_train(observations_axis=1, dtype=np.float64):
+    full_pca_train = np.load('%s/train_full_pca.npy' % DATA_PATH)
+
+    if dtype != full_pca_train.dtype:
+        full_pca_train = full_pca_train.astype(dtype)
+
+    if observations_axis == 0:
+        full_pca_train = full_pca_train.T
+
+    return full_pca_train
+
+
 def load_all_test(observations_axis=1, dtype=np.float64):
     return load_dataset(
         (FEATURE_SPACE, TEST_COUNT), load_test,
@@ -138,6 +153,18 @@ def load_all_nnz_test(observations_axis=1, dtype=np.float64):
         ),
         nnz_mask
     )
+
+
+def load_full_pca_test(observations_axis=1, dtype=np.float64):
+    full_pca_test = np.load('%s/test_full_pca.npy' % DATA_PATH)
+
+    if dtype != full_pca_test.dtype:
+        full_pca_test = full_pca_test.astype(dtype)
+
+    if observations_axis == 0:
+        full_pca_test = full_pca_test.T
+
+    return full_pca_test
 
 
 def load_full_dataset(observations_axis=1, dtype=np.float64):
