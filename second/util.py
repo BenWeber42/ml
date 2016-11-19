@@ -58,7 +58,7 @@ def recover_from_masked(x, mask=None, dtype=np.float64):
         return x
 
     mri = np.zeros(DIMS, dtype=dtype)
-    mri[mask] = x;
+    mri[mask] = x
     return mri
 
 
@@ -201,7 +201,7 @@ def load_full_nnz_dataset(observations_axis=1, dtype=np.float64):
 
 
 def load_z_plane(i, z=int(Z_DIM/2), train_data=True):
-    if train_data == True:
+    if train_data is True:
         return load_train(i)[:, :, z]
     else:
         return load_test(i)[:, :, z]
@@ -217,7 +217,7 @@ def load_all_z_planes(
     def _load_z_plane(i):
         return load_z_plane(i, z, train_data)
 
-    if train_data == True:
+    if train_data is True:
         return load_dataset(
                 (Z_PLANE_FEATURE_SPACE, TRAIN_COUNT), _load_z_plane,
                 observations_axis=observations_axis, dtype=dtype

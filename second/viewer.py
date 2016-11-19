@@ -11,6 +11,7 @@ def usage():
     print('  path: path to nni file')
     exit()
 
+
 if len(argv) != 2:
     usage()
 
@@ -44,6 +45,7 @@ def update(val):
     mri_plot.set_data(mri[:, :, z])
     ax.set_title('z = %d/%d' % (z + 1, max_z + 1))
     plt.draw()
+
 
 # connect callback to slider
 sframe.on_changed(update)
