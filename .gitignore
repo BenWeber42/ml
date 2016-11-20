@@ -4,4 +4,10 @@ first/data/set_test/
 first/data/set_train/
 first/plots/10_planes/
 first/plots/mid_cuts/
+first/source/
 first/source/__pycache__/
+
+second/data/set_train/
+second/data/set_test/
+second/data/data.tar.gz
+second/__pycache__/
