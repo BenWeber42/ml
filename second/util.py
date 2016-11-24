@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.decomposition import TruncatedSVD
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from nibabel.nifti1 import (
     load as _load_nifti1,
     save as _save_nifti1,
@@ -9,7 +9,7 @@ from nibabel.nifti1 import (
 from os.path import dirname, abspath
 import csv
 
-
+SUBMISSION_PATH = dirname(abspath(__file__)) + '/submissions'
 DATA_PATH = dirname(abspath(__file__)) + '/data'
 PLOTS_PATH = dirname(abspath(__file__)) + '/plots'
 
@@ -299,7 +299,7 @@ def pca_plots(data, plots_dir, components_correlation=10):
 
 
 def create_submission_file(labels, output_file='submission.csv'):
-    with open('%s/%s' % (DATA_PATH, output_file), 'w') as outcsv:
+    with open('%s/%s' % (SUBMISSION_PATH, output_file), 'w') as outcsv:
         writer = csv.writer(outcsv)
         writer.writerow(["ID", "Prediction"])
 

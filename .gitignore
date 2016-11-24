@@ -11,3 +11,4 @@ second/data/set_train/
 second/data/set_test/
 second/data/data.tar.gz
 second/__pycache__/
+second/segmentation.py

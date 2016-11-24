@@ -85,6 +85,7 @@ class DataPipeline(object):
 
         self.train_data = np.hstack((train_raw_data, train_pca_data))
         self.test_data = np.hstack((test_raw_data, test_pca_data))
+        self.all_data = np.hstack((np.vstack((train_raw_data, test_raw_data)), np.vstack((train_pca_data, test_pca_data))))
 
         self.data_dict_builder = DataDictBuilder({
             RAW_DATA: (0, train_raw_data.shape[1]),
