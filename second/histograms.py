@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
 import util
@@ -57,3 +58,21 @@ def partition(mri, partitions=(3, 3, 3), mask=None):
 
 def histogram(data, interval=(1, 2000), bins=50):
     return np.histogram(data, bins=bins, range=interval)[0]
+
+
+if __name__ == '__main__':
+    train, nnz = util.load_all_nnz_train(observations_axis=0)
+    test, _ = util.load_all_nnz_test(observations_axis=0)
+
+    histogramer = PartitionedHistograms(
+        partitions=(9, 9, 9),
+        interval=(1, 2000),
+        bins=45,
+        mask=nnz
+    )
+
+    train_histograms = histogramer.fit(train).transform(train)
+    test_histograms = histogramer.fit(test).transform(test)
+
+    np.save('%s/train_histograms.npy' % util.DATA_PATH, train_histograms)
+    np.save('%s/test_histograms.npy' % util.DATA_PATH, test_histograms)

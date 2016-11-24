@@ -132,6 +132,18 @@ def load_full_pca_train(observations_axis=1, dtype=np.float64):
     return full_pca_train
 
 
+def load_train_histograms(observations_axis=1, dtype=np.float64):
+    train_histograms = np.load('%s/train_histograms.npy' % DATA_PATH)
+
+    if dtype != train_histograms.dtype:
+        train_histograms = train_histograms.astype(dtype)
+
+    if observations_axis == 1:
+        train_histograms = train_histograms.T
+
+    return train_histograms
+
+
 def load_all_test(observations_axis=1, dtype=np.float64):
     return load_dataset(
         (FEATURE_SPACE, TEST_COUNT), load_test,
@@ -165,6 +177,18 @@ def load_full_pca_test(observations_axis=1, dtype=np.float64):
         full_pca_test = full_pca_test.T
 
     return full_pca_test
+
+
+def load_test_histograms(observations_axis=1, dtype=np.float64):
+    test_histograms = np.load('%s/test_histograms.npy' % DATA_PATH)
+
+    if dtype != test_histograms.dtype:
+        test_histograms = test_histograms.astype(dtype)
+
+    if observations_axis == 1:
+        test_histograms = test_histograms.T
+
+    return test_histograms
 
 
 def load_full_dataset(observations_axis=1, dtype=np.float64):
