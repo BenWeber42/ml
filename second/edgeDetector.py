@@ -41,7 +41,7 @@ def detectEdges(volume, settings=(1,1,1)):
             mri[:,:,z] = mri[:,:,z] + edges
     
     
-    mri2 = mri > (2*256) #edge should be detected on two different slices containing the point (x,y,z)  (e.g. in plane xy and plane yz that contains the point (x,y,z))
+    mri2 = mri > (256) #edge should be detected on two different slices containing the point (x,y,z)  (e.g. in plane xy and plane yz that contains the point (x,y,z))
     mri2 = mri2.astype(int)    
 
     return mri2
