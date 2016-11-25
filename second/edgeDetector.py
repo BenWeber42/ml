@@ -78,4 +78,4 @@ def generateAndSaveFull():
     fullTestMatrix = generateFullTestMatrix()
     np.save("data\\test_full_edge", fullTestMatrix)
     print("test_full_edge saved", np.shape(fullTestMatrix))
-    
+
