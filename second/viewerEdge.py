@@ -9,6 +9,7 @@ import csv
 from sys import argv, exit
 import edgeDetector
 
+
 axcolor = 'lightgoldenrodyellow'
 
 sX = None
@@ -160,5 +161,6 @@ else:
     statusPatient = "error"
         
 plt.suptitle("Slices of MRI images"+ "\nCognitive health status: " +  statusPatient + "\nfilename:" +'train_'+str(patientInit)+'.nii' )
+
 plt.show()
 
