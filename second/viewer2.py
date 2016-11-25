@@ -6,15 +6,14 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 import csv
-from _overlapped import NULL
 from sys import argv, exit
 
 
 axcolor = 'lightgoldenrodyellow'
 
-sX = NULL
-sY = NULL
-sZ = NULL
+sX = None
+sY = None
+sZ = None
 
 def usage():
     print('%s <path targets.csv> | <path nii folder>' % argv[0])
@@ -59,22 +58,22 @@ def onSliderChangePatient(val):
 def onSliderChangeX(val):
     x = int(round(val))
     slice_0 = volume[x, :, :, 0]
-    show_slices([slice_0, NULL, NULL])
+    show_slices([slice_0, None, None])
     
 def onSliderChangeY(val):
     y = int(round(val))
     slice_1 = volume[:, y, :, 0]
-    show_slices([NULL, slice_1, NULL])
+    show_slices([None, slice_1, None])
     
 def onSliderChangeZ(val):
     z = int(round(val))
     slice_2 = volume[:, :, z, 0]
-    show_slices([NULL, NULL, slice_2])
+    show_slices([None, None, slice_2])
     
       
 def show_slices(slices):
     for i, slice in enumerate(slices):
-        if slice is not NULL:
+        if slice is not None:
             axes[i].imshow(slice.T, cmap="gray", origin="lower")
     fig.canvas.draw_idle()
 
