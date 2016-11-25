@@ -70,8 +70,11 @@ def generateFullTestMatrix(detectorSettings=(1,1,1), partitions=(9,9,9)):
         testMatrix.append(generateEdgeFeaturesVector(util.load_test(i)))
     return testMatrix
 
-np.save("data\\train_full_edge", generateFullTrainMatrix())
-print("train_full_edge saved")
-np.save("data\\test_full_edge", generateFullTestMatrix())
-print("test_full_edge saved")
+fullTrainMatrix = generateFullTrainMatrix()
+np.save("data\\train_full_edge", fullTrainMatrix)
+print("train_full_edge saved", np.shape(fullTrainMatrix))
+
+fullTestMatrix = generateFullTestMatrix()
+np.save("data\\test_full_edge", fullTestMatrix)
+print("test_full_edge saved", np.shape(fullTestMatrix))
 
