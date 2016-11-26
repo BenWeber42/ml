@@ -1,0 +1,52 @@
+Aksan Emre <eaksan@inf.ethz.ch>
+Weber Benjamin <benweber@student.ethz.ch>
+Delai Marco <marco.delai@hest.ethz.ch>
+
+Preprocessing
+  none, nil, null
+
+Features
+  pca, histograms, edges, normalization
+
+Model
+  random forests, linear svm, rbf svm and others
+
+Description
+
+  Preprocessing
+
+    No preprocessing was done as we did not see the need for it. We did consider
+    various preprocessing steps, but decided to focus elsewhere as we saw no need
+    for preprocessing for the remainder of our pipeline.
+
+  Features
+
+    For the feature extraction we used again the PCA.
+
+    Additionally, we implemented configurable partitioned histograms.
+    Configurable in the sense that one can configure the interval for the
+    histograms (most 0 values are useless), the number of bins to be used and how
+    often each axis (x, y, z) should be partitioned.
+    We experimented with various settings but found that they were not very
+    important for the scoring. We settled with reasonable settings.
+
+    Furthermore, we implemented a 3D version of the canny edge detection based
+    upon OpenCV's 2d canny edges algorithm. Unfortunately, that was at a rather
+    late stage, so we did not manage to make use of it for our final submission.
+
+  Model
+
+    For the classification we tried out various classifiers from sklearn. We found
+    that random forests perfomed best and that a support vector machine also
+    yielded good scores. Thus, we focused on these two and tuned the
+    hyperparameters using sklearn's cross validation grid search.
+
+  Final Submission
+
+    For the final submission we concatenated the PCA features as well as the
+    histogram features. Afterwards, we normalized the features w.r.t. to zero
+    mean and unit variance per dimension. We then did the classification using
+    random forests with parameters tuned by the cross validation grid search.
+    We tried to avoid overfitting by comparing the cross validation scores
+    with the kaggle scores and saw the they were consistent for the final
+    submission.
