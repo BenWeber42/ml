@@ -25,7 +25,7 @@ def svm(training_feature_matrix, training_targets, test_feature_matrix):
 	    for params, mean_score, scores in clf.grid_scores_:
 	        print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
 
-	print("SVM [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+	print("SVM [%0.3f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
 	predicted_labels = clf.predict_proba(test_feature_matrix)
 
 	if CREATE_SUBMISSION_FILE == True:
@@ -49,7 +49,7 @@ def adaboost(training_feature_matrix, training_targets, test_feature_matrix):
 	    for params, mean_score, scores in clf.grid_scores_:
 	        print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
 
-	print("ADABOOST [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+	print("ADABOOST [%0.3f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
 	predicted_labels = clf.predict_proba(test_feature_matrix)
 
 	if CREATE_SUBMISSION_FILE == True:
@@ -71,7 +71,7 @@ def knn(training_feature_matrix, training_targets, test_feature_matrix):
 	    for params, mean_score, scores in clf.grid_scores_:
 	        print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
 
-	print("KNN [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+	print("KNN [%0.3f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
 	predicted_labels = clf.predict_proba(test_feature_matrix)
 
 	if CREATE_SUBMISSION_FILE == True:
@@ -85,22 +85,22 @@ def random_forest(training_feature_matrix, training_targets, test_feature_matrix
 	# Parameter distribution for random search.
 	param_dist= {
 		"max_depth": [2, 5, None],
-		"max_features": sp_randint(1, training_feature_matrix.shape[1]),
+		"max_features": sp_randint(1, min(300, training_feature_matrix.shape[1])),
 		"min_samples_split": sp_randint(1, 20),
 		"min_samples_leaf": sp_randint(1, 20),
 		'n_estimators': [10, 50, 100, 200],
 		'bootstrap': [True, False],
 	}
-	r_forest = RandomForestClassifier()
-	n_iter_search = 200
-	clf = RandomizedSearchCV(estimator=r_forest, param_distributions=param_dist, n_iter=n_iter_search, n_jobs=N_JOBS, cv=10, scoring='neg_log_loss',)
+	r_forest = RandomForestClassifier(random_state=1)
+	n_iter_search = 500
+	clf = RandomizedSearchCV(estimator=r_forest, param_distributions=param_dist, n_iter=n_iter_search, n_jobs=N_JOBS, cv=10, random_state=1, scoring='neg_log_loss')
 	clf.fit(training_feature_matrix, training_targets)
 
 	if PRINT_ESTIMATOR_RESULTS == True:
 	    for params, mean_score, scores in clf.grid_scores_:
 	        print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() * 2, params))
 
-	print("RANDOM FOREST [%0.2f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
+	print("RANDOM FOREST [%0.3f] - The best parameters are %s" % (-clf.best_score_, clf.best_params_))
 	predicted_labels = clf.predict_proba(test_feature_matrix)
 
 	if CREATE_SUBMISSION_FILE == True:
