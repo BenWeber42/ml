@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.decomposition import TruncatedSVD
-#import matplotlib.pyplot as plt
 from nibabel.nifti1 import (
     load as _load_nifti1,
     save as _save_nifti1,
@@ -10,7 +9,8 @@ from os.path import dirname, abspath
 import csv
 
 SUBMISSION_PATH = dirname(abspath(__file__)) + '/submissions'
-DATA_PATH = dirname(abspath(__file__)) + '/data'
+DATA_PATH = dirname(abspath(__file__)) + '/../data'
+ADDITIONAL_DATA_PATH = dirname(abspath(__file__)) + '/data'
 PLOTS_PATH = dirname(abspath(__file__)) + '/plots'
 
 DIMS = X_DIM, Y_DIM, Z_DIM = 176, 208, 176
@@ -43,7 +43,9 @@ def load_nnz_mask():
     global __NNZ_MASK_MEMOIZATION
 
     if __NNZ_MASK_MEMOIZATION is None:
-        __NNZ_MASK_MEMOIZATION = tuple(np.load('%s/nnz_mask.npy' % DATA_PATH))
+        __NNZ_MASK_MEMOIZATION = tuple(np.load(
+            '%s/nnz_mask.npy' % ADDITIONAL_DATA_PATH
+        ))
 
     return __NNZ_MASK_MEMOIZATION
 
@@ -121,7 +123,7 @@ def load_all_nnz_train(observations_axis=1, dtype=np.float64):
 
 
 def load_full_pca_train(observations_axis=1, dtype=np.float64):
-    full_pca_train = np.load('%s/train_full_pca.npy' % DATA_PATH)
+    full_pca_train = np.load('%s/train_full_pca.npy' % ADDITIONAL_DATA_PATH)
 
     if dtype != full_pca_train.dtype:
         full_pca_train = full_pca_train.astype(dtype)
@@ -133,7 +135,9 @@ def load_full_pca_train(observations_axis=1, dtype=np.float64):
 
 
 def load_train_histograms(observations_axis=1, dtype=np.float64):
-    train_histograms = np.load('%s/train_histograms.npy' % DATA_PATH)
+    train_histograms = np.load(
+        '%s/train_histograms.npy' % ADDITIONAL_DATA_PATH
+    )
 
     if dtype != train_histograms.dtype:
         train_histograms = train_histograms.astype(dtype)
@@ -168,7 +172,7 @@ def load_all_nnz_test(observations_axis=1, dtype=np.float64):
 
 
 def load_full_pca_test(observations_axis=1, dtype=np.float64):
-    full_pca_test = np.load('%s/test_full_pca.npy' % DATA_PATH)
+    full_pca_test = np.load('%s/test_full_pca.npy' % ADDITIONAL_DATA_PATH)
 
     if dtype != full_pca_test.dtype:
         full_pca_test = full_pca_test.astype(dtype)
@@ -180,7 +184,7 @@ def load_full_pca_test(observations_axis=1, dtype=np.float64):
 
 
 def load_test_histograms(observations_axis=1, dtype=np.float64):
-    test_histograms = np.load('%s/test_histograms.npy' % DATA_PATH)
+    test_histograms = np.load('%s/test_histograms.npy' % ADDITIONAL_DATA_PATH)
 
     if dtype != test_histograms.dtype:
         test_histograms = test_histograms.astype(dtype)
@@ -295,6 +299,8 @@ def truncated_pca(X, observations_axis=1, n_components=1000):
 
 
 def pca_plots(data, plots_dir, components_correlation=10):
+    import matplotlib.pyplot as plt
+
     pc, pv = dense_pca(data)
 
     data_reduced = np.dot(pc[:, :max(2, components_correlation)].T, data)
