@@ -9,7 +9,7 @@ Features
   pca, histograms, edges, normalization
 
 Model
-  random forests, linear svm, rbf svm and others
+  randomforests, linearsvm, rbfsvm and others
 
 Description
 
@@ -21,7 +21,9 @@ Description
 
   Features
 
-    For the feature extraction we used again the PCA.
+    For the feature extraction we used again the PCA. But found that the
+    histograms were much better for prediction. For the final submission we did
+    not use the PCA reduced data.
 
     Additionally, we implemented configurable partitioned histograms.
     Configurable in the sense that one can configure the interval for the
@@ -43,10 +45,17 @@ Description
 
   Final Submission
 
-    For the final submission we concatenated the PCA features as well as the
-    histogram features. Afterwards, we normalized the features w.r.t. to zero
-    mean and unit variance per dimension. We then did the classification using
-    random forests with parameters tuned by the cross validation grid search.
-    We tried to avoid overfitting by comparing the cross validation scores
-    with the kaggle scores and saw the they were consistent for the final
-    submission.
+    For the final submission we first extracted the histograms features with
+    the following settings:
+
+    bins: 30 (found by experience)
+
+    interval: [1, 2000] (excludes most useless zero values and covers well over
+    99.9% of the values)
+
+    partitions: (9, 9, 9) (we experimented with different parameters and found
+    those to be working well. Also, they were suggested in the top10 teams'
+    slides of mlp1)
+
+    Afterwards we used the random forests classifier provided by sklearn
+    and tuned its hyperparametes through sklearns cross validation grid search.

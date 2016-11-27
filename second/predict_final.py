@@ -6,5 +6,5 @@ if __name__ == '__main__':
     path.append(dirname(abspath(__file__)) + '/src/')
 
     # run classification pipeline
-    from classification_pipeline import main
+    from classification_pipeline_final import main
     main()
