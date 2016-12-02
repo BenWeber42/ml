@@ -1,0 +1,61 @@
+Aksan Emre <eaksan@inf.ethz.ch>
+Weber Benjamin <benweber@student.ethz.ch>
+Delai Marco <marco.delai@hest.ethz.ch>
+
+Preprocessing
+  none, nil, null
+
+Features
+  pca, histograms, edges, normalization
+
+Model
+  randomforests, linearsvm, rbfsvm and others
+
+Description
+
+  Preprocessing
+
+    No preprocessing was done as we did not see the need for it. We did consider
+    various preprocessing steps, but decided to focus elsewhere as we saw no need
+    for preprocessing for the remainder of our pipeline.
+
+  Features
+
+    For the feature extraction we used again the PCA. But found that the
+    histograms were much better for prediction. For the final submission we did
+    not use the PCA reduced data.
+
+    Additionally, we implemented configurable partitioned histograms.
+    Configurable in the sense that one can configure the interval for the
+    histograms (most 0 values are useless), the number of bins to be used and how
+    often each axis (x, y, z) should be partitioned.
+    We experimented with various settings but found that they were not very
+    important for the scoring. We settled with reasonable settings.
+
+    Furthermore, we implemented a 3D version of the canny edge detection based
+    upon OpenCV's 2d canny edges algorithm. Unfortunately, that was at a rather
+    late stage, so we did not manage to make use of it for our final submission.
+
+  Model
+
+    For the classification we tried out various classifiers from sklearn. We found
+    that random forests perfomed best and that a support vector machine also
+    yielded good scores. Thus, we focused on these two and tuned the
+    hyperparameters using sklearn's cross validation grid search.
+
+  Final Submission
+
+    For the final submission we first extracted the histograms features with
+    the following settings:
+
+    bins: 30 (found by experience)
+
+    interval: [1, 2000] (excludes most useless zero values and covers well over
+    99.9% of the values)
+
+    partitions: (9, 9, 9) (we experimented with different parameters and found
+    those to be working well. Also, they were suggested in the top10 teams'
+    slides of mlp1)
+
+    Afterwards we used the random forests classifier provided by sklearn
+    and tuned its hyperparametes through sklearns cross validation grid search.
