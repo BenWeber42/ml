@@ -1,0 +1,20 @@
+Aksan Emre <eaksan@inf.ethz.ch>
+Weber Benjamin <benweber@student.ethz.ch>
+Delai Marco <marco.delai@hest.ethz.ch>
+
+Preprocessing
+key1, key2, key3
+
+Features
+key1, key2, key3
+
+Model
+key1, key2, key3
+
+Description
+Verbose and detailed description of preprocessing, features, model and
+other things that are helpful to understand what was done exactly.
+E.g. if key1 = histogram for features, then the description might look
+like this: "We divide the image into 7x7x7 blocks and make a histogram
+with 10 bins for each of them. These histograms are then concatenated
+into a vector"

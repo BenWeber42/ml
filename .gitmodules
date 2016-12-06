@@ -1,0 +1,3 @@
+[submodule "third/checkSub"]
+	path = third/checkSub
+	url = https://github.com/VikWeg/mlp2

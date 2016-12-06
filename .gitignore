@@ -12,3 +12,6 @@ second/data/set_test/
 second/data/data.tar.gz
 second/__pycache__/
 second/segmentation.py
+
+third/MLP2_LittleBigData.zip
+third/MLP3_LittleBigData.zip
