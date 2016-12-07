@@ -12,41 +12,44 @@ def usage():
     exit()
 
 
-if len(argv) != 2:
-    usage()
+def view(mri, cmap=plt.cm.gray):
+    max_z = mri.shape[2] - 1
+    initial_z = int(max_z/2)
 
-try:
-    num = int(argv[1])
-    mri = load_train(num)
-except:
-    mri = load_nifti1(argv[1])
+    # set up figure
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.autoscale(True)
+    plt.subplots_adjust(left=0.25, bottom=0.25)
 
-max_z = mri.shape[2] - 1
-initial_z = int(max_z/2)
+    # plot first data set
+    mri_plot = ax.imshow(mri[:, :, initial_z], cmap=cmap)
 
-# set up figure
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.autoscale(True)
-plt.subplots_adjust(left=0.25, bottom=0.25)
+    # make the slider
+    axframe = plt.axes([0.25, 0.1, 0.65, 0.03])
+    sframe = Slider(axframe, 'Frame', 0, max_z, valinit=initial_z, valfmt='%d')
 
-# plot first data set
-frame = 0
-mri_plot = ax.imshow(mri[:, :, initial_z], cmap=plt.cm.gray)
+    # call back function
+    def update(val):
+        z = int(sframe.val)
+        mri_plot.set_data(mri[:, :, z])
+        ax.set_title('z = %d/%d' % (z + 1, max_z + 1))
+        plt.draw()
 
-# make the slider
-axframe = plt.axes([0.25, 0.1, 0.65, 0.03])
-sframe = Slider(axframe, 'Frame', 0, max_z, valinit=initial_z, valfmt='%d')
-
-
-# call back function
-def update(val):
-    z = int(sframe.val)
-    mri_plot.set_data(mri[:, :, z])
-    ax.set_title('z = %d/%d' % (z + 1, max_z + 1))
-    plt.draw()
+    # connect callback to slider
+    sframe.on_changed(update)
+    plt.show()
 
 
-# connect callback to slider
-sframe.on_changed(update)
-plt.show()
+if __name__ == '__main__':
+
+    if len(argv) != 2:
+        usage()
+
+    try:
+        num = int(argv[1])
+        mri = load_train(num)
+    except:
+        mri = load_nifti1(argv[1])
+
+    view(mri)
