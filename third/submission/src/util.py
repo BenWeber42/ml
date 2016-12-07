@@ -26,7 +26,7 @@ Z_PLANE_FEATURE_SPACE = X_DIM * Y_DIM
 __NNZ_MASK_MEMOIZATION = None
 
 
-def load_refs(observations_axis=1):
+def load_refs(observations_axis=0):
     refs = np.asarray(
         [[int(v) for v in line.replace('\n', '').split(',')]
             for line in open('%s/targets.csv' % DATA_PATH)],
@@ -91,7 +91,7 @@ def save(data, filename):
     _save_nifti1(Nifti1Image(data, None), filename)
 
 
-def load_dataset(dims, load, observations_axis=1, dtype=np.float64):
+def load_dataset(dims, load, observations_axis=0, dtype=np.float64):
     x_dim, y_dim = dims
 
     if observations_axis == 1:
@@ -108,14 +108,14 @@ def load_dataset(dims, load, observations_axis=1, dtype=np.float64):
     return data
 
 
-def load_all_train(observations_axis=1, dtype=np.float64):
+def load_all_train(observations_axis=0, dtype=np.float64):
     return load_dataset(
             (FEATURE_SPACE, TRAIN_COUNT), load_train,
             observations_axis=observations_axis, dtype=dtype
         )
 
 
-def load_all_nnz_train(observations_axis=1, dtype=np.float64):
+def load_all_nnz_train(observations_axis=0, dtype=np.float64):
     nnz_mask = load_nnz_mask()
     nnz_count = get_mask_count(nnz_mask)
 
@@ -131,7 +131,7 @@ def load_all_nnz_train(observations_axis=1, dtype=np.float64):
     )
 
 
-def load_full_pca_train(observations_axis=1, dtype=np.float64):
+def load_full_pca_train(observations_axis=0, dtype=np.float64):
     full_pca_train = np.load('%s/train_full_pca.npy' % ADDITIONAL_DATA_PATH)
 
     if dtype != full_pca_train.dtype:
@@ -143,7 +143,7 @@ def load_full_pca_train(observations_axis=1, dtype=np.float64):
     return full_pca_train
 
 
-def load_train_histograms(observations_axis=1, dtype=np.float64):
+def load_train_histograms(observations_axis=0, dtype=np.float64):
     train_histograms = np.load(
         '%s/train_histograms.npy' % ADDITIONAL_DATA_PATH
     )
@@ -157,14 +157,14 @@ def load_train_histograms(observations_axis=1, dtype=np.float64):
     return train_histograms
 
 
-def load_all_test(observations_axis=1, dtype=np.float64):
+def load_all_test(observations_axis=0, dtype=np.float64):
     return load_dataset(
         (FEATURE_SPACE, TEST_COUNT), load_test,
         observations_axis=observations_axis, dtype=dtype
     )
 
 
-def load_all_nnz_test(observations_axis=1, dtype=np.float64):
+def load_all_nnz_test(observations_axis=0, dtype=np.float64):
     nnz_mask = load_nnz_mask()
     nnz_count = get_mask_count(nnz_mask)
 
@@ -180,7 +180,7 @@ def load_all_nnz_test(observations_axis=1, dtype=np.float64):
     )
 
 
-def load_full_pca_test(observations_axis=1, dtype=np.float64):
+def load_full_pca_test(observations_axis=0, dtype=np.float64):
     full_pca_test = np.load('%s/test_full_pca.npy' % ADDITIONAL_DATA_PATH)
 
     if dtype != full_pca_test.dtype:
@@ -192,7 +192,7 @@ def load_full_pca_test(observations_axis=1, dtype=np.float64):
     return full_pca_test
 
 
-def load_test_histograms(observations_axis=1, dtype=np.float64):
+def load_test_histograms(observations_axis=0, dtype=np.float64):
     test_histograms = np.load('%s/test_histograms.npy' % ADDITIONAL_DATA_PATH)
 
     if dtype != test_histograms.dtype:
@@ -204,7 +204,7 @@ def load_test_histograms(observations_axis=1, dtype=np.float64):
     return test_histograms
 
 
-def load_full_dataset(observations_axis=1, dtype=np.float64):
+def load_full_dataset(observations_axis=0, dtype=np.float64):
 
     def load(i):
         if i < TRAIN_COUNT:
@@ -218,7 +218,7 @@ def load_full_dataset(observations_axis=1, dtype=np.float64):
     )
 
 
-def load_full_nnz_dataset(observations_axis=1, dtype=np.float64):
+def load_full_nnz_dataset(observations_axis=0, dtype=np.float64):
     nnz_mask = load_nnz_mask()
     nnz_count = get_mask_count(nnz_mask)
 
@@ -247,7 +247,7 @@ def load_z_plane(i, z=int(Z_DIM/2), train_data=True):
 def load_all_z_planes(
     z=int(Z_DIM/2),
     train_data=True,
-    observations_axis=1,
+    observations_axis=0,
     dtype=np.float64
 ):
 
@@ -266,7 +266,7 @@ def load_all_z_planes(
             )
 
 
-def nonzero_rv(data, observations_axis=1):
+def nonzero_rv(data, observations_axis=0):
     nnz = np.nonzero(np.sum(data, axis=observations_axis))[0]
 
     if observations_axis == 1:
@@ -275,7 +275,7 @@ def nonzero_rv(data, observations_axis=1):
         return data[:, nnz]
 
 
-def dense_pca(X, full_matrices=False, observations_axis=1):
+def dense_pca(X, full_matrices=False, observations_axis=0):
     X -= np.mean(X, axis=observations_axis, keepdims=True)
 
     print('Doing SVD on %d, %d matrix' % X.shape)
@@ -287,7 +287,7 @@ def dense_pca(X, full_matrices=False, observations_axis=1):
     return u, d**2
 
 
-def truncated_pca(X, observations_axis=1, n_components=1000):
+def truncated_pca(X, observations_axis=0, n_components=1000):
     tsvd = TruncatedSVD(n_components=n_components)
 
     if observations_axis == 0:
