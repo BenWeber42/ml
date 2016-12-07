@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
+import util
 
 
 class PartitionedHistograms(BaseEstimator, TransformerMixin):
@@ -14,23 +15,45 @@ class PartitionedHistograms(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, data):
-        feature_count = (
-            self.partitions[0]*self.partitions[1]*self.partitions[2]*self.bins
+        return partitioned_histograms(
+            data,
+            observations_axis=0,
+            partitions=self.partitions,
+            interval=self.interval,
+            bins=self.bins
         )
 
-        histograms = np.empty((data.shape[0], feature_count))
 
-        for i, mri in enumerate(data):
-            partitions = partition(mri, partitions=self.partitions)
+def partitioned_histograms(
+    data,
+    observations_axis=0,
+    partitions=(3, 3, 3),
+    interval=(1, 2000),
+    bins=50
+):
+    if observations_axis == 1:
+        data = data.T
 
-            mri_histograms = [
-                histogram(part, bins=self.bins, interval=self.interval)
-                for part in partitions
-            ]
+    feature_count = partitions[0]*partitions[1]*partitions[2]*bins
+    samples_count = data.shape[0]
 
-            histograms[i] = np.array(mri_histograms).flatten()
+    histograms = np.empty((samples_count, feature_count))
 
-        return histograms
+    for i, mri in enumerate(data):
+        mri = mri.reshape(util.DIMS)
+        partitions = partition(mri, partitions=partitions)
+
+        mri_histograms = [
+            histogram(part, bins=bins, interval=interval)
+            for part in partitions
+        ]
+
+        histograms[i] = np.array(mri_histograms).flatten()
+
+    if observations_axis == 1:
+        histograms = histograms.T
+
+    return histograms
 
 
 def partition(mri, partitions=(3, 3, 3)):
