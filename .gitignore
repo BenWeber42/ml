@@ -15,3 +15,5 @@ second/segmentation.py
 
 third/MLP2_LittleBigData.zip
 third/MLP3_LittleBigData.zip
+
+__pycache__

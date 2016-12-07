@@ -3,6 +3,8 @@ rm -rf ./MLP2_LittleBigData.zip
 cd submission
 git archive -o ../MLP2_LittleBigData.zip HEAD .
 cd ../
+git submodule init
+git submodule update
 python ./checkSub/checkSub.py MLP2_LittleBigData.zip
 
 # TODO: adjust readme
