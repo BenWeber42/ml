@@ -77,61 +77,11 @@ def load_all_train(observations_axis=0, dtype=np.float64):
         )
 
 
-def load_full_pca_train(observations_axis=0, dtype=np.float64):
-    full_pca_train = np.load('%s/train_full_pca.npy' % ADDITIONAL_DATA_PATH)
-
-    if dtype != full_pca_train.dtype:
-        full_pca_train = full_pca_train.astype(dtype)
-
-    if observations_axis == 0:
-        full_pca_train = full_pca_train.T
-
-    return full_pca_train
-
-
-def load_train_histograms(observations_axis=0, dtype=np.float64):
-    train_histograms = np.load(
-        '%s/train_histograms.npy' % ADDITIONAL_DATA_PATH
-    )
-
-    if dtype != train_histograms.dtype:
-        train_histograms = train_histograms.astype(dtype)
-
-    if observations_axis == 1:
-        train_histograms = train_histograms.T
-
-    return train_histograms
-
-
 def load_all_test(observations_axis=0, dtype=np.float64):
     return load_dataset(
         (FEATURE_SPACE, TEST_COUNT), load_test,
         observations_axis=observations_axis, dtype=dtype
     )
-
-
-def load_full_pca_test(observations_axis=0, dtype=np.float64):
-    full_pca_test = np.load('%s/test_full_pca.npy' % ADDITIONAL_DATA_PATH)
-
-    if dtype != full_pca_test.dtype:
-        full_pca_test = full_pca_test.astype(dtype)
-
-    if observations_axis == 0:
-        full_pca_test = full_pca_test.T
-
-    return full_pca_test
-
-
-def load_test_histograms(observations_axis=0, dtype=np.float64):
-    test_histograms = np.load('%s/test_histograms.npy' % ADDITIONAL_DATA_PATH)
-
-    if dtype != test_histograms.dtype:
-        test_histograms = test_histograms.astype(dtype)
-
-    if observations_axis == 1:
-        test_histograms = test_histograms.T
-
-    return test_histograms
 
 
 def load_full_dataset(observations_axis=0, dtype=np.float64):
@@ -146,6 +96,15 @@ def load_full_dataset(observations_axis=0, dtype=np.float64):
         (FEATURE_SPACE, TRAIN_COUNT + TEST_COUNT), load,
         observations_axis=observations_axis, dtype=dtype
     )
+
+
+def load_pca_dataset(observations_axis=0, dtype=np.float64):
+    pca_dataset = np.load('%s/full_pca.npy' % ADDITIONAL_DATA_PATH)
+
+    if observations_axis == 1:
+        pca_dataset = pca_dataset.T
+
+    return pca_dataset.astype(dtype)
 
 
 def load_z_plane(i, z=int(Z_DIM/2), train_data=True):
@@ -260,6 +219,6 @@ def create_submission_file(labels, output_file='submission.csv'):
 def load_preprocessed_data(data_files):
     # data_files is a tuple of training and test files which are
     # preprocessed and saved in .npy format.
-    train_data = np.load('%s/%s' % (DATA_PATH, data_files[0]))
-    test_data = np.load('%s/%s' % (DATA_PATH, data_files[1]))
+    train_data = np.load('%s/%s' % (ADDITIONAL_DATA_PATH, data_files[0]))
+    test_data = np.load('%s/%s' % (ADDITIONAL_DATA_PATH, data_files[1]))
     return (train_data, test_data)
