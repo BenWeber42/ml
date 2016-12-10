@@ -31,7 +31,7 @@ def load_refs(observations_axis=0):
         dtype=np.float64
     )
 
-    if observations_axis == 0:
+    if observations_axis == 1:
         refs = refs.T
 
     return refs
@@ -207,13 +207,15 @@ def pca_plots(data, plots_dir, components_correlation=10):
         plt.close()
 
 
-def create_submission_file(labels, output_file='submission.csv'):
+def create_submission_file(y_hat, output_file='submission.csv'):
     with open('%s/%s' % (SUBMISSION_PATH, output_file), 'w') as outcsv:
         writer = csv.writer(outcsv)
-        writer.writerow(["ID", "Prediction"])
+        writer.writerow(["ID", "Sample", "Label", "Predicted"])
 
-        for row_data in zip(range(1, TEST_COUNT+1), labels):
-            writer.writerow(list(row_data))
+        for i, labels in enumerate(y_hat):
+            writer.writerow([3*i, i, 'gender', bool(labels[0])])
+            writer.writerow([3*i + 1, i, 'age', bool(labels[1])])
+            writer.writerow([3*i + 2, i, 'health', bool(labels[2])])
 
 
 def load_preprocessed_data(data_files):

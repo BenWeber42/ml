@@ -1,4 +1,6 @@
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from sklearn.metrics import hamming_loss, make_scorer
+from os import environ as sysenv
 import numpy as np
 import util
 
@@ -8,10 +10,16 @@ import util
 CREATE_SUBMISSION_FILE = True
 # Num of CPU cores for parallel processing.
 N_JOBS = 8
+if 'LBD_N_JOBS' in sysenv.keys():
+    N_JOBS = int(sysenv['LBD_N_JOBS'])
 # A one-word-descriptor for the experiment
 SUBMISSION_FILE_SUFFIX = ''
 # If True, prints results for all possible configurations.
 PRINT_ESTIMATOR_RESULTS = False
+# How many cross validation folds to do
+CV_N = 10
+# Scoring
+SCORING = make_scorer(hamming_loss, greater_is_better=False)
 
 
 def svm(training_feature_matrix, training_targets, test_feature_matrix):
@@ -27,8 +35,8 @@ def svm(training_feature_matrix, training_targets, test_feature_matrix):
         estimator=svm,
         param_grid=param_grid,
         n_jobs=N_JOBS,
-        cv=10,
-        scoring='neg_log_loss'
+        cv=CV_N,
+        scoring=SCORING
     )
     clf.fit(training_feature_matrix, training_targets)
 
@@ -39,7 +47,7 @@ def svm(training_feature_matrix, training_targets, test_feature_matrix):
 
     print("SVM [%0.3f] - The best parameters are %s"
           % (-clf.best_score_, clf.best_params_))
-    predicted_labels = clf.predict_proba(test_feature_matrix)
+    predicted_labels = clf.predict(test_feature_matrix)
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
@@ -61,8 +69,8 @@ def adaboost(training_feature_matrix, training_targets, test_feature_matrix):
         estimator=adaboost,
         param_grid=param_grid,
         n_jobs=N_JOBS,
-        cv=10,
-        scoring='neg_log_loss'
+        cv=CV_N,
+        scoring=SCORING
     )
     clf.fit(training_feature_matrix, training_targets)
 
@@ -73,7 +81,7 @@ def adaboost(training_feature_matrix, training_targets, test_feature_matrix):
 
     print("ADABOOST [%0.3f] - The best parameters are %s"
           % (-clf.best_score_, clf.best_params_))
-    predicted_labels = clf.predict_proba(test_feature_matrix)
+    predicted_labels = clf.predict(test_feature_matrix)
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
@@ -93,8 +101,8 @@ def knn(training_feature_matrix, training_targets, test_feature_matrix):
         estimator=knn,
         param_grid=param_grid,
         n_jobs=N_JOBS,
-        cv=10,
-        scoring='neg_log_loss'
+        cv=CV_N,
+        scoring=SCORING
     )
     clf.fit(training_feature_matrix, training_targets)
 
@@ -105,7 +113,7 @@ def knn(training_feature_matrix, training_targets, test_feature_matrix):
 
     print("KNN [%0.3f] - The best parameters are %s"
           % (-clf.best_score_, clf.best_params_))
-    predicted_labels = clf.predict_proba(test_feature_matrix)
+    predicted_labels = clf.predict(test_feature_matrix)
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
@@ -140,9 +148,9 @@ def random_forest(
         param_distributions=param_dist,
         n_iter=n_iter_search,
         n_jobs=N_JOBS,
-        cv=10,
+        cv=CV_N,
         random_state=1,
-        scoring='neg_log_loss'
+        scoring=SCORING
     )
     clf.fit(training_feature_matrix, training_targets)
 
@@ -153,7 +161,7 @@ def random_forest(
 
     print("RANDOM FOREST [%0.3f] - The best parameters are %s"
           % (-clf.best_score_, clf.best_params_))
-    predicted_labels = clf.predict_proba(test_feature_matrix)
+    predicted_labels = clf.predict(test_feature_matrix)
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(

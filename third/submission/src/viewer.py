@@ -12,7 +12,18 @@ def usage():
     exit()
 
 
+def _view(arg):
+    try:
+        num = int(arg)
+        mri = load_train(num)
+    except:
+        mri = load_nifti1(arg)
+
+    view(mri)
+
+
 def view(mri, cmap=plt.cm.gray):
+
     max_z = mri.shape[2] - 1
     initial_z = int(max_z/2)
 
@@ -46,10 +57,4 @@ if __name__ == '__main__':
     if len(argv) != 2:
         usage()
 
-    try:
-        num = int(argv[1])
-        mri = load_train(num)
-    except:
-        mri = load_nifti1(argv[1])
-
-    view(mri)
+    view(argv[1])

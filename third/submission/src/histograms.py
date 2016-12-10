@@ -41,11 +41,11 @@ def partitioned_histograms(
 
     for i, mri in enumerate(data):
         mri = mri.reshape(util.DIMS)
-        partitions = partition(mri, partitions=partitions)
+        parts = partition(mri, partitions=partitions)
 
         mri_histograms = [
             histogram(part, bins=bins, interval=interval)
-            for part in partitions
+            for part in parts
         ]
 
         histograms[i] = np.array(mri_histograms).flatten()

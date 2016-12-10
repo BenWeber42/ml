@@ -1,4 +1,4 @@
-#!/usr/bin/env python -W ignore::DeprecationWarning
+#!/usr/bin/env python
 import numpy as np
 import util
 from histograms import partitioned_histograms
@@ -33,11 +33,11 @@ def main():
                 interval=interval,
                 bins=bins
             ),
-            {'histograms': {
+            {
                 'partitions': partitions,
                 'interval': interval,
                 'bins': bins
-            }}
+            }
         )
         for partitions in [
             (3, 3, 3),
@@ -54,8 +54,10 @@ def main():
 
     for hist_data, hist_cfg in histograms:
 
-        feature_cfg = {}
-        feature_cfg.update(hist_cfg)
+        feature_cfg = {
+            'histograms': hist_cfg
+        }
+
         print('Using features settings:')
         print(feature_cfg)
 
