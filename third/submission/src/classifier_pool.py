@@ -12,6 +12,7 @@ CREATE_SUBMISSION_FILE = True
 N_JOBS = 8
 if 'LBD_N_JOBS' in sysenv.keys():
     N_JOBS = int(sysenv['LBD_N_JOBS'])
+    print('Using %d jobs' % N_JOBS)
 # A one-word-descriptor for the experiment
 SUBMISSION_FILE_SUFFIX = ''
 # If True, prints results for all possible configurations.
@@ -35,6 +36,7 @@ def svm(training_feature_matrix, training_targets, test_feature_matrix):
         estimator=svm,
         param_grid=param_grid,
         n_jobs=N_JOBS,
+        pre_dispatch=N_JOBS,
         cv=CV_N,
         scoring=SCORING
     )
@@ -51,7 +53,7 @@ def svm(training_feature_matrix, training_targets, test_feature_matrix):
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
-            predicted_labels[:, 1],
+            predicted_labels,
             'submission_svm%s.csv' % (SUBMISSION_FILE_SUFFIX)
         )
 
@@ -69,6 +71,7 @@ def adaboost(training_feature_matrix, training_targets, test_feature_matrix):
         estimator=adaboost,
         param_grid=param_grid,
         n_jobs=N_JOBS,
+        pre_dispatch=N_JOBS,
         cv=CV_N,
         scoring=SCORING
     )
@@ -85,7 +88,7 @@ def adaboost(training_feature_matrix, training_targets, test_feature_matrix):
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
-            predicted_labels[:, 1],
+            predicted_labels,
             'submission_adaboost%s.csv' % (SUBMISSION_FILE_SUFFIX)
         )
 
@@ -101,6 +104,7 @@ def knn(training_feature_matrix, training_targets, test_feature_matrix):
         estimator=knn,
         param_grid=param_grid,
         n_jobs=N_JOBS,
+        pre_dispatch=N_JOBS,
         cv=CV_N,
         scoring=SCORING
     )
@@ -117,7 +121,7 @@ def knn(training_feature_matrix, training_targets, test_feature_matrix):
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
-            predicted_labels[:, 1],
+            predicted_labels,
             'submission_knn%s.csv' % (SUBMISSION_FILE_SUFFIX)
         )
 
@@ -148,6 +152,7 @@ def random_forest(
         param_distributions=param_dist,
         n_iter=n_iter_search,
         n_jobs=N_JOBS,
+        pre_dispatch=N_JOBS,
         cv=CV_N,
         random_state=1,
         scoring=SCORING
@@ -165,6 +170,6 @@ def random_forest(
 
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
-            predicted_labels[:, 1],
+            predicted_labels,
             'submission_random_forest%s.csv' % (SUBMISSION_FILE_SUFFIX)
         )
