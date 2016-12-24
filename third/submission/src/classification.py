@@ -2,6 +2,7 @@
 import numpy as np
 import util
 from histograms import partitioned_histograms
+from canny_edges import partitioned_canny_edges
 import classifier_pool as classifiers
 np.random.seed(1)
 
@@ -52,10 +53,14 @@ def main():
         ]
     ]
 
+    print('Precomputing canny edges.')
+    canny_edges = partitioned_canny_edges(dataset)
+
     for hist_data, hist_cfg in histograms:
 
         feature_cfg = {
-            'histograms': hist_cfg
+            'histograms': hist_cfg,
+            'canny_edges': 'default'
         }
 
         print('Using features settings:')
@@ -63,12 +68,14 @@ def main():
 
         training_feature_matrix = np.hstack((
             hist_data[:util.TRAIN_COUNT],
-            pca_dataset[:util.TRAIN_COUNT]
+            pca_dataset[:util.TRAIN_COUNT],
+            canny_edges[:util.TRAIN_COUNT]
         ))
 
         test_feature_matrix = np.hstack((
             hist_data[util.TRAIN_COUNT:],
-            pca_dataset[util.TRAIN_COUNT:]
+            pca_dataset[util.TRAIN_COUNT:],
+            canny_edges[util.TRAIN_COUNT:]
         ))
 
         print('Training feature matrix dimensionality '

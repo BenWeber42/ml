@@ -37,8 +37,8 @@ def load_refs(observations_axis=0):
     return refs
 
 
-def load_nifti1(path):
-    return _load_nifti1(path).get_data().reshape(*DIMS)
+def load_nifti1(path, dtype=np.float64):
+    return _load_nifti1(path).get_data().reshape(*DIMS).astype(dtype)
 
 
 def load_train(i):
