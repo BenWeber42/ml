@@ -9,16 +9,18 @@ import util
 
 CREATE_SUBMISSION_FILE = True
 # Num of CPU cores for parallel processing.
-N_JOBS = 8
+N_JOBS = 16
 if 'LBD_N_JOBS' in sysenv.keys():
     N_JOBS = int(sysenv['LBD_N_JOBS'])
     print('Using %d jobs' % N_JOBS)
 # A one-word-descriptor for the experiment
 SUBMISSION_FILE_SUFFIX = ''
+# A one-word-descriptor for the experiment
+SUBMISSION_FILE_PREFIX = ''
 # If True, prints results for all possible configurations.
 PRINT_ESTIMATOR_RESULTS = False
 # How many cross validation folds to do
-CV_N = 20
+CV_N = 100
 # Scoring
 SCORING = make_scorer(hamming_loss, greater_is_better=False)
 
@@ -55,7 +57,7 @@ def svm(training_feature_matrix, training_targets, test_feature_matrix):
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
             predicted_labels,
-            'submission_svm%s.csv' % (SUBMISSION_FILE_SUFFIX)
+            '%s_submission_svm%s.csv' % (SUBMISSION_FILE_PREFIX,SUBMISSION_FILE_SUFFIX)
         )
 
 
@@ -91,7 +93,7 @@ def adaboost(training_feature_matrix, training_targets, test_feature_matrix):
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
             predicted_labels,
-            'submission_adaboost%s.csv' % (SUBMISSION_FILE_SUFFIX)
+            '%s_submission_adaboost%s.csv' % (SUBMISSION_FILE_PREFIX,SUBMISSION_FILE_SUFFIX)
         )
 
 
@@ -125,7 +127,7 @@ def knn(training_feature_matrix, training_targets, test_feature_matrix):
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
             predicted_labels,
-            'submission_knn%s.csv' % (SUBMISSION_FILE_SUFFIX)
+            '%s_submission_knn%s.csv' % (SUBMISSION_FILE_PREFIX,SUBMISSION_FILE_SUFFIX)
         )
     return clf
 
@@ -146,11 +148,10 @@ def random_forest(
         ),
         "min_samples_split": sp_randint(1, 20),
         "min_samples_leaf": sp_randint(1, 20),
-        'n_estimators': [10, 50, 100, 200, 300],
-        'bootstrap': [True, False],
+        'n_estimators': [100, 200, 300],
     }
     r_forest = RandomForestClassifier(random_state=1)
-    n_iter_search = 200
+    n_iter_search = 100
     clf = RandomizedSearchCV(
         estimator=r_forest,
         param_distributions=param_dist,
@@ -176,7 +177,7 @@ def random_forest(
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
             predicted_labels,
-            'submission_random_forest%s.csv' % (SUBMISSION_FILE_SUFFIX)
+            '%s_submission_random_forest%s.csv' % (SUBMISSION_FILE_PREFIX,SUBMISSION_FILE_SUFFIX)
         )
     return clf
 
@@ -197,10 +198,10 @@ def extra_trees_classifier(
         "max_depth": [2, 5, None],
         "min_samples_split": sp_randint(1, 20),
         "min_samples_leaf": sp_randint(1, 20),
-        'n_estimators': [10, 50, 100, 200, 300],
+        'n_estimators': [100, 200, 300],
     }
     etc = ExtraTreesClassifier(random_state=1)
-    n_iter_search = 200
+    n_iter_search = 50
     clf = RandomizedSearchCV(
         estimator=etc,
         param_distributions=param_dist,
@@ -226,5 +227,5 @@ def extra_trees_classifier(
     if CREATE_SUBMISSION_FILE is True:
         util.create_submission_file(
             predicted_labels,
-            'extra_trees_classifier%s.csv' % (SUBMISSION_FILE_SUFFIX)
+            '%s_submission_etc%s.csv' % (SUBMISSION_FILE_PREFIX,SUBMISSION_FILE_SUFFIX)
         )

@@ -68,3 +68,27 @@ Or simply:
 
 import util, viewer, canny_edges
 viewer.view(canny_edges.canny_edges(util.load_train(0)))
+
+
+Connected Threshold Image Filter:
+-------------------------------------
+mriN = ((mri-mri.min())/(mri.max()-mri.min()))*255
+smri = sitk.GetImageFromArray(mriN)
+blurFilter = sitk.CurvatureFlowImageFilter()
+blurFilter.SetNumberOfIterations(5)
+blurFilter.SetTimeStep(0.125)
+image = blurFilter.Execute(smri)
+
+segmentationFilter = sitk.NeighborhoodConnectedImageFilter()
+segmentationFilter.SetLower(60.0)
+segmentationFilter.SetUpper(90.0)
+segmentationFilter.SetReplaceValue(255)
+radius = [2,2,2]
+segmentationFilter.SetRadius( radius )
+seed = [int(70), int(70), int(70)]
+segmentationFilter.AddSeed(seed)
+print( "Adding seed at: ", seed, " with intensity: ", image.GetPixel(*seed) )
+
+image = segmentationFilter.Execute(image)
+mriRes = sitk.GetArrayFromImage(image)
+viewer.view(mriRes)

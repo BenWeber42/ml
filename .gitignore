@@ -17,5 +17,6 @@ third/MLP2_LittleBigData.zip
 third/MLP3_LittleBigData.zip
 third/submission/data
 third/submission/src/submissions
+third/submission/src/log*
 
 __pycache__

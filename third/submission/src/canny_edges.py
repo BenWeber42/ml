@@ -41,6 +41,12 @@ def partitioned_canny_edges(
 
 def canny_edges(mri, lower=200, upper=300):
     smri = sitk.GetImageFromArray(mri)
+    # Smoothing by keeping borders.
+    #blurFilter = sitk.CurvatureFlowImageFilter()
+    #blurFilter.SetNumberOfIterations( 5 )
+    #blurFilter.SetTimeStep( 0.125 )
+    #smri = blurFilter.Execute(smri)
+
     sedges = sitk.CannyEdgeDetection(
         smri,
         lowerThreshold=lower,
