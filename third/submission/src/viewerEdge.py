@@ -56,13 +56,28 @@ def onSliderChangePatient(val):
     
     
     if targets[val-1][0] == str(0) :
-        statusPatient = "diseased"
+        statusPatient = "male"
     elif targets[val-1][0] == str(1):
-        statusPatient = "healthy"
+        statusPatient = "female"
     else:
         statusPatient = "error"
+    
+    if targets[val-1][1] == str(0) :
+        statusPatient = statusPatient + ", "+ "old"
+    elif targets[val-1][1] == str(1):
+        statusPatient = statusPatient + ", "+ "young"
+    else:
+        statusPatient = "error"
+
+    if targets[val-1][2] == str(0) :
+        statusPatient = statusPatient + ", "+"sick"
+    elif targets[val-1][2] == str(1):
+        statusPatient = statusPatient + ", "+"healthy"
+    else:
+        statusPatient = "error"    
+
         
-    plt.suptitle("Slices of MRI images"+ "\nCognitive health status: " +  statusPatient + "\nfilename:" +'train_'+str(val)+'.nii' )
+    plt.suptitle("Slices of MRI images"+ "\nStatus: " +  statusPatient + "\nfilename:" +'train_'+str(val)+'.nii' )
     show_slices([[slice_0, slice_1, slice_2],
                  [slice_0_edge, slice_1_edge, slice_2_edge]])
     
@@ -154,9 +169,23 @@ show_slices([[slice_0, slice_1, slice_2],
             [slice_0_edge, slice_1_edge, slice_2_edge]])
     
 if targets[patientInit-1][0] == str(0) :
-    statusPatient = "diseased"
+    statusPatient = "male"
 elif targets[patientInit-1][0] == str(1):
-    statusPatient = "healthy"
+    statusPatient = "female"
+else:
+    statusPatient = "error"
+
+if targets[patientInit-1][1] == str(0) :
+    statusPatient = statusPatient + ", "+ "old"
+elif targets[patientInit-1][1] == str(1):
+    statusPatient = statusPatient + ", "+ "young"
+else:
+    statusPatient = "error"
+
+if targets[patientInit-1][2] == str(0) :
+    statusPatient = statusPatient + ", "+"sick"
+elif targets[patientInit-1][2] == str(1):
+    statusPatient = statusPatient + ", "+"healthy"
 else:
     statusPatient = "error"
         

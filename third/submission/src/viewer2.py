@@ -129,12 +129,26 @@ slice_2 = volume[:, :, zInit, 0]
 show_slices([slice_0, slice_1, slice_2])
     
 if targets[patientInit-1][0] == str(0) :
-    statusPatient = "diseased"
+    statusPatient = "male"
 elif targets[patientInit-1][0] == str(1):
-    statusPatient = "healthy"
+    statusPatient = "female"
+else:
+    statusPatient = "error"
+
+if targets[patientInit-1][1] == str(0) :
+    statusPatient = statusPatient + ", "+ "old"
+elif targets[patientInit-1][1] == str(1):
+    statusPatient = statusPatient + ", "+ "young"
+else:
+    statusPatient = "error"
+
+if targets[patientInit-1][2] == str(0) :
+    statusPatient = statusPatient + ", "+"sick"
+elif targets[patientInit-1][2] == str(1):
+    statusPatient = statusPatient + ", "+"healthy"
 else:
     statusPatient = "error"
         
-plt.suptitle("Slices of MRI images"+ "\nCognitive health status: " +  statusPatient + "\nfilename:" +'train_'+str(patientInit)+'.nii' )
+plt.suptitle("Slices of MRI images"+ "\nStatus: " +  statusPatient + "\nfilename:" +'train_'+str(patientInit)+'.nii' )
 plt.show()
 
