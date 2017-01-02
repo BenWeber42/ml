@@ -18,7 +18,7 @@ print('------------------')
 
 ESTIMATOR_POOL = {
     'random_forest': True,
-    'knn': True,
+    'knn': False,
     'extra_trees_classifier': False,
     'svm': False, # Does not support multi-label classification
     'adaboost': False, # Does not support multi-label classification
@@ -46,7 +46,7 @@ def main():
 
     if FEATURE_POOL['pca_disk'] == True:
         print('Loading PCA.')
-        pca_disk = util.load_pca_disk()
+        pca_disk = util.load_pca_dataset()
         pca_disk_cfg = str(pca_disk.shape[1])
     else:
         pca_disk = emptyDataset
@@ -84,13 +84,12 @@ def main():
             )
             for partitions in [
                 (3, 3, 3),
-                (6, 6, 6),
             ]
             for interval in [
                 (1, 2000)
             ]
             for bins in [
-                5, 25, 45
+                5
             ]
         ]
     else:
@@ -113,11 +112,10 @@ def main():
                 }
             )
             for partitions in [
-                (7, 7, 7),
                 (9, 9, 9),
             ]
             for lower in [
-                100,200
+                100
             ]
         ]
     else:

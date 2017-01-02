@@ -3,18 +3,63 @@ Weber Benjamin <benweber@student.ethz.ch>
 Delai Marco <marco.delai@hest.ethz.ch>
 
 Preprocessing
-key1, key2, key3
+  data normalization
 
 Features
-key1, key2, key3
+  pca, histograms, edges
 
 Model
-key1, key2, key3
+  randomforests, knn, extraTreesClassifier
 
 Description
-Verbose and detailed description of preprocessing, features, model and
-other things that are helpful to understand what was done exactly.
-E.g. if key1 = histogram for features, then the description might look
-like this: "We divide the image into 7x7x7 blocks and make a histogram
-with 10 bins for each of them. These histograms are then concatenated
-into a vector"
+
+  Preprocessing
+
+    Data is normalized before applying PCA so that every voxel has zero mean
+    and unit-variance statistics.
+
+  Features
+
+  	We used three feature sources namely PCA (1), voxel-value histograms (2) 
+  	and edge-value histograms (3):
+
+  	(1) Dimensionality is reduced to 50.
+
+  	(2) We implemented configurable partitioned histograms. Configurable in 
+  	the sense  that one can configure the interval for the histograms (most 
+  	0 values are  useless), the number of bins to be used and how often each 
+  	axis (x, y, z) should be partitioned. By using the non-normalized data, 
+  	we paritioned the brain and created histograms of voxel-values.
+
+    (3) Furthermore, we implemented a 3D version of the canny edge detection based
+    upon SimpleITK library's CannyEdgeDetection algorithm. Afterwards, we partitioned
+    the brain and count edge pixels in order to estimate edge density in the 
+    corresponding region.
+
+    We experimented with various histogram settings.
+
+  Model
+  
+    For the classification we tried out various classifiers from sklearn. We found
+    that random forests perfomed best. Thus, we focused on these two and tuned the
+    hyperparameters using sklearn's cross validation grid search.
+
+  Final Submission
+
+    For the final submission we first extracted the histograms features with
+    the following settings:
+
+	(1) PCA: 50
+
+	(2) Voxel-value histograms: 
+	- partitions: (3, 3, 3)
+    - bins: 5
+	- interval: (1, 2000) (excludes most useless zero values and covers well over
+    99.9% of the values)
+
+    (3) Edge-value histograms: 
+    - lower threshold: 100
+    - upper threshold: 300
+    - partitions: (9, 9, 9)
+
+    where all parameters are selected empirically. 
